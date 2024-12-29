@@ -16,26 +16,50 @@ const TodoScreen = () => {
   const [todoList, setTodoList] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [todoToDelete, setTodoToDelete] = useState(null);
+  const [editedTodo, setEditedTodo] = useState(null);
 
+  //new tasks gets appended
   const handleAddTodo = () => {
     setTodoList([...todoList, {id: Date.now().toString(), title: todo}]);
     setTodo('');
   };
 
-  const handleDeleteTodo = id => {
+  //modal for opens up for delete action
+  const handleTodo = id => {
     setIsModalVisible(true);
-    setTodoToDelete(id); // Save the ID of the todo to be deleted
+    setTodoToDelete(id);
   };
 
+  //task gets deleted
   const confirmDeleteTodo = () => {
     const updatedTodoList = todoList.filter(todo => todo.id !== todoToDelete);
     setTodoList(updatedTodoList);
-    setTodoToDelete(null); // Clear the selected todo ID
-    setIsModalVisible(false); // Close the modal
+    setTodoToDelete(null);
+    setIsModalVisible(false);
   };
 
+  //to close modal
   const closeModal = () => {
     setIsModalVisible(false);
+  };
+
+  //to edit task
+  const handleEditTodo = todo => {
+    setEditedTodo(todo);
+    setTodo(todo.title);
+  };
+
+  //to update edited task
+  const handleUpdateTodo = () => {
+    const updatedTodos = todoList.map(item => {
+      if (item.id === editedTodo.id) {
+        return {...item, title: todo};
+      }
+      return item;
+    });
+    setTodoList(updatedTodos);
+    setEditedTodo(null);
+    setTodo('');
   };
 
   const renderTodo = ({item}) => {
@@ -60,13 +84,14 @@ const TodoScreen = () => {
           color="#FFF"
           size={28}
           style={{paddingHorizontal: 10}}
+          onPress={() => handleEditTodo(item)}
         />
         <Icon
           name="remove"
           color="#FFF"
           size={28}
           style={{paddingHorizontal: 10}}
-          onPress={() => handleDeleteTodo(item.id)}
+          onPress={() => handleTodo(item.id)}
         />
       </View>
     );
@@ -94,35 +119,61 @@ const TodoScreen = () => {
         value={todo}
         onChangeText={userText => setTodo(userText)}
       />
-      <TouchableOpacity
-        style={{
-          backgroundColor: '#000000',
-          borderRadius: 6,
-          paddingVertical: 8,
-          marginVertical: 24,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        onPress={handleAddTodo}>
-        <Text
+
+      {editedTodo ? (
+        <TouchableOpacity
           style={{
-            color: '#ffffff',
-            fontWeight: 'bold',
-            fontSize: 20,
-            textAlign: 'center',
-          }}>
-          Add
-        </Text>
-      </TouchableOpacity>
+            backgroundColor: '#000000',
+            borderRadius: 6,
+            paddingVertical: 8,
+            marginVertical: 24,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onPress={handleUpdateTodo}>
+          <Text
+            style={{
+              color: '#ffffff',
+              fontWeight: 'bold',
+              fontSize: 20,
+              textAlign: 'center',
+            }}>
+            Save
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#000000',
+            borderRadius: 6,
+            paddingVertical: 8,
+            marginVertical: 24,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onPress={handleAddTodo}>
+          <Text
+            style={{
+              color: '#ffffff',
+              fontWeight: 'bold',
+              fontSize: 20,
+              textAlign: 'center',
+            }}>
+            Add
+          </Text>
+        </TouchableOpacity>
+      )}
 
       {/* Rendering todolist */}
       <FlatList data={todoList} renderItem={renderTodo} />
 
       {/* MyModal Component */}
       <MyModal
+        btn1Title="Ok"
+        btn2Title="Exit"
         visible={isModalVisible}
-        deleteTask={() => confirmDeleteTodo()} // Pass the close handler
-        closeModal={() => closeModal()}
+        deleteTask={confirmDeleteTodo}
+        closeModal={closeModal}
       />
     </View>
   );

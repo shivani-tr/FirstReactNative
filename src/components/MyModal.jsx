@@ -2,7 +2,13 @@
 /* eslint-disable react/react-in-jsx-scope */
 import {View, Button, Text, Modal} from 'react-native';
 
-export default function MyModal({visible, closeModal, deleteTask}) {
+export default function MyModal({
+  btn1Title = 'Delete',
+  btn2Title = 'Exit',
+  visible,
+  closeModal,
+  deleteTask, //deleting
+}) {
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
       <View
@@ -21,19 +27,19 @@ export default function MyModal({visible, closeModal, deleteTask}) {
           }}>
           <Text style={{fontSize: 18, marginBottom: 20}}>Are you sure?</Text>
           <Button
-            title="Delete"
+            title={btn1Title}
             color="red"
             onPress={() => {
-              deleteTask(); // Call the passed `closeModal` function
+              deleteTask();
             }}
           />
           <View style={{marginTop: 10}}>
             <Button
-              title="Exit"
+              title={btn2Title}
               color="midnightblue"
               onPress={() => {
                 closeModal();
-              }} // Close the modal on clicking "Exit"
+              }}
             />
           </View>
         </View>
