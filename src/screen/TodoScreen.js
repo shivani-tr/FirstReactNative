@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import {
-  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -8,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import CheckBox from '@react-native-community/checkbox';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MyModal from '../components/MyModal';
 
@@ -18,23 +18,24 @@ const TodoScreen = () => {
   const [todoToDelete, setTodoToDelete] = useState(null);
   const [editedTodo, setEditedTodo] = useState(null);
 
-  //new tasks gets appended
+  // Add new task
   const handleAddTodo = () => {
-    if (todo === '') {
-      return;
-    }
+    if (todo === '') return;
 
-    setTodoList([...todoList, {id: Date.now().toString(), title: todo}]);
+    setTodoList([
+      ...todoList,
+      {id: Date.now().toString(), title: todo, completed: false},
+    ]);
     setTodo('');
   };
 
-  //modal for opens up for delete action
+  // Open modal for delete action
   const handleTodo = id => {
     setIsModalVisible(true);
     setTodoToDelete(id);
   };
 
-  //task gets deleted
+  // Confirm delete task
   const confirmDeleteTodo = () => {
     const updatedTodoList = todoList.filter(todo => todo.id !== todoToDelete);
     setTodoList(updatedTodoList);
@@ -42,18 +43,18 @@ const TodoScreen = () => {
     setIsModalVisible(false);
   };
 
-  //to close modal
+  // Close modal
   const closeModal = () => {
     setIsModalVisible(false);
   };
 
-  //to edit task
+  // Edit task
   const handleEditTodo = todo => {
     setEditedTodo(todo);
     setTodo(todo.title);
   };
 
-  //to update edited task
+  // Update edited task
   const handleUpdateTodo = () => {
     const updatedTodos = todoList.map(item => {
       if (item.id === editedTodo.id) {
@@ -64,6 +65,24 @@ const TodoScreen = () => {
     setTodoList(updatedTodos);
     setEditedTodo(null);
     setTodo('');
+  };
+
+  //complete-incomplete checkbox feature
+  const toggleTaskCompletion = id => {
+    const updatedTodos = todoList.map(item => {
+      if (item.id === id) {
+        return {...item, completed: !item.completed};
+      }
+      return item;
+    });
+
+    // Reordering tasks
+    const reorderedTodos = [
+      ...updatedTodos.filter(item => !item.completed),
+      ...updatedTodos.filter(item => item.completed),
+    ];
+
+    setTodoList(reorderedTodos);
   };
 
   const renderTodo = ({item}) => {
@@ -78,8 +97,40 @@ const TodoScreen = () => {
           flexDirection: 'row',
           alignItems: 'center',
         }}>
+        {/* Checkbox from react-native-community is not working so, made a custom styling */}
+        <TouchableOpacity
+          onPress={() => toggleTaskCompletion(item.id)}
+          style={{
+            height: 24,
+            width: 24,
+            borderWidth: 2,
+            borderColor: '#FFF',
+            borderRadius: 4,
+            backgroundColor: item.completed ? '#FFF' : 'transparent',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 10,
+          }}>
+          {item.completed && (
+            <View
+              style={{
+                height: 14,
+                width: 14,
+                backgroundColor: '#ffffff',
+                borderRadius: 2,
+              }}
+            />
+          )}
+        </TouchableOpacity>
+
         <Text
-          style={{color: '#ffffff', fontSize: 20, fontWeight: '700', flex: 1}}>
+          style={{
+            color: '#ffffff',
+            fontSize: 20,
+            fontWeight: '700',
+            flex: 1,
+            textDecorationLine: item.completed ? 'line-through' : 'none',
+          }}>
           {item.title}
         </Text>
 
@@ -168,8 +219,12 @@ const TodoScreen = () => {
         </TouchableOpacity>
       )}
 
-      {/* Rendering todolist */}
-      <FlatList data={todoList} renderItem={renderTodo} />
+      {/* Render Todo List */}
+      <FlatList
+        data={todoList}
+        renderItem={renderTodo}
+        keyExtractor={item => item.id}
+      />
 
       {/* MyModal Component */}
       <MyModal
