@@ -1,3 +1,4 @@
+import React, {useState} from 'react';
 import {
   Alert,
   FlatList,
@@ -7,23 +8,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
-// const dummyData = [
-//   {
-//     id: '01',
-//     title: 'Sleep',
-//   },
-//   {
-//     id: '02',
-//     title: 'Watch Death note',
-//   },
-// ];
+import MyModal from '../components/MyModal';
 
 const TodoScreen = () => {
   const [todo, setTodo] = useState('');
   const [todoList, setTodoList] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [todoToDelete, setTodoToDelete] = useState(null);
 
   const handleAddTodo = () => {
     setTodoList([...todoList, {id: Date.now().toString(), title: todo}]);
@@ -31,12 +23,22 @@ const TodoScreen = () => {
   };
 
   const handleDeleteTodo = id => {
-    const updatedTodoList = todoList.filter(todo => todo.id !== id);
-    setTodoList(updatedTodoList);
-    setTodo('');
+    setIsModalVisible(true);
+    setTodoToDelete(id); // Save the ID of the todo to be deleted
   };
 
-  const renderTodo = ({item, index}) => {
+  const confirmDeleteTodo = () => {
+    const updatedTodoList = todoList.filter(todo => todo.id !== todoToDelete);
+    setTodoList(updatedTodoList);
+    setTodoToDelete(null); // Clear the selected todo ID
+    setIsModalVisible(false); // Close the modal
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+  };
+
+  const renderTodo = ({item}) => {
     return (
       <View
         style={{
@@ -49,7 +51,7 @@ const TodoScreen = () => {
           alignItems: 'center',
         }}>
         <Text
-          style={{color: '#ffffff', fontSize: 20, fontWeight: 700, flex: 1}}>
+          style={{color: '#ffffff', fontSize: 20, fontWeight: '700', flex: 1}}>
           {item.title}
         </Text>
 
@@ -101,7 +103,7 @@ const TodoScreen = () => {
           alignItems: 'center',
           justifyContent: 'center',
         }}
-        onPress={() => handleAddTodo()}>
+        onPress={handleAddTodo}>
         <Text
           style={{
             color: '#ffffff',
@@ -115,6 +117,13 @@ const TodoScreen = () => {
 
       {/* Rendering todolist */}
       <FlatList data={todoList} renderItem={renderTodo} />
+
+      {/* MyModal Component */}
+      <MyModal
+        visible={isModalVisible}
+        deleteTask={() => confirmDeleteTodo()} // Pass the close handler
+        closeModal={() => closeModal()}
+      />
     </View>
   );
 };
