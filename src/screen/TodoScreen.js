@@ -20,6 +20,10 @@ const TodoScreen = () => {
 
   //new tasks gets appended
   const handleAddTodo = () => {
+    if (todo === '') {
+      return;
+    }
+
     setTodoList([...todoList, {id: Date.now().toString(), title: todo}]);
     setTodo('');
   };
